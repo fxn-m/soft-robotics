@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-# Author: Qiukai Qi
+# Author: Qiukai Qi & Felix Newport-Mangel
 # Date:
 
 
