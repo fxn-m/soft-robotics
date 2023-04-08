@@ -1,5 +1,5 @@
 # -*- coding:utf-8 -*-
-# Author: Qiukai Qi & Felix Newport-Mangel
+# Author: Qiukai Qi & Felix Newport-Mangell
 # Date:
 
 
@@ -7,15 +7,18 @@ import numpy as np
 import cv2 as cv
 import math
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
+n_markers = 7
 
 
-def sorting(centers_initial, centers_present):
+def sorting(centers_initial, centers_present, n_markers):
     '''this function sorts the centers detected.
     '''
-    centers_intermediate = np.ones((5, 2))
+    centers_intermediate = np.ones((n_markers, 2))
     # looping
-    for i in range(5):
-        for j in range(5):
+    for i in range(n_markers):
+        for j in range(n_markers):
             # calculating distance and judge
             if np.sqrt(np.sum(np.square(centers_initial[i]-centers_present[j]))) < 40:
                 centers_intermediate[i] = centers_present[j]
@@ -44,9 +47,9 @@ if __name__ == '__main__':
     # origin = np.array([200, 400])
     # ROI = np.array([1200, 1080])
 
-    file_path = 'IMG_3603.mov'
+    file_path = 'IMG_3614.mov'
     # dims 1920x1080
-    origin = np.array([600,675])
+    origin = np.array([600, 675])
     ROI = np.array([850, 1050])
 
     vc = cv.VideoCapture(file_path)
@@ -55,20 +58,47 @@ if __name__ == '__main__':
         print("Error opening video stream or file")
 
     centers_temp = np.array([])
+
+    # Set up the matplotlib figure and axis
+    fig, ax = plt.subplots()
+    ax.set_title("Angles for each adjacent line pair")
+    ax.set_xlabel("Frame")
+    ax.set_ylabel("Angle (degrees)")
+
+    # Initialize the plot lines for each line pair
+    plot_lines = []
+    for i in range(n_markers - 2):
+        line, = ax.plot([], [], label=f"Line pair {i + 1}")
+        plot_lines.append(line)
+    ax.legend(loc=3)
+
+    # Initialize the frame counter and angles_list
+    frame_count = 0
     angles_list = []
+
+    # Function to update the plot for each frame
+    def update_plot(frame_count, angles_list):
+        for i, line in enumerate(plot_lines):
+            line.set_data(range(frame_count), [
+                          angles[i] for angles in angles_list])
+        ax.relim()
+        ax.autoscale_view()
 
     while (vc.isOpened()):
         ret, img_rgb = vc.read()
 
+        # Check if the frame is empty and break the loop if it is
+        if not ret or img_rgb is None:
+            break
+
         # cropping
         # img_rgb = img_rgb[origin[0]:ROI[0], origin[1]:ROI[1]]
-        
+
         # blurring
         img_rgb = cv.medianBlur(img_rgb, 5)
-        img_rgb= cv.rotate(img_rgb, cv.ROTATE_90_CLOCKWISE)
+        img_rgb = cv.rotate(img_rgb, cv.ROTATE_90_CLOCKWISE)
 
         img_hsv = cv.cvtColor(img_rgb, cv.COLOR_BGR2HSV)
-
 
         # detecting points by color
         red_hsv_lower = np.array([0, 50, 50])
@@ -81,7 +111,6 @@ if __name__ == '__main__':
         mask2 = cv.inRange(img_hsv, lowerb=red_hsv_lower,
                            upperb=red_hsv_higher)
         mask = mask1 + mask2
-
 
         # detecting contours
         contours, hierarchy = cv.findContours(
@@ -102,7 +131,7 @@ if __name__ == '__main__':
             centers_temp = centers
 
         # sorting
-        centers = sorting(centers_temp, centers)    
+        centers = sorting(centers_temp, centers, n_markers)
         centers_temp = centers
 
         # calculating angles
@@ -118,15 +147,24 @@ if __name__ == '__main__':
                     (centers[i+1, 0], centers[i+1, 1]), (255, 0, 0), 2)
 
         if ret:
-            cv.imshow('image', cv.rotate(img_rgb, cv.ROTATE_90_COUNTERCLOCKWISE))
+            cv.imshow('image', cv.rotate(
+                img_rgb, cv.ROTATE_90_COUNTERCLOCKWISE))
 
-            if cv.waitKey(27) & 0xFF == ord('q'):
+            # Update the plot with the new angles
+            frame_count += 1
+            update_plot(frame_count, angles_list)
+            plt.pause(0.001)
+
+            if cv.waitKey(27//25) & 0xFF == ord('q'):
                 break
 
         else:
             break
 
     cv.destroyAllWindows()
+
+    # erase plot
+    plt.clf()
 
     # After the video processing loop
     angles_array = np.array(angles_list)
