@@ -2,14 +2,11 @@
 # Author: Qiukai Qi & Felix Newport-Mangell
 # Date:
 
-
 import numpy as np
 import cv2 as cv
 import math
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-
-n_markers = 7
 
 
 def sorting(centers_initial, centers_present, n_markers):
@@ -40,15 +37,21 @@ def angle_between_lines(p1, p2, p3):
     return angle * 180 / math.pi
 
 
+def update_plot(frame_count, angles_list):
+    """
+    Update the plot for each line pair
+    Called for each frame by the animation function
+    """
+    for i, line in enumerate(plot_lines):
+        line.set_data(range(frame_count), [
+            angles[i] for angles in angles_list])
+    ax.relim()
+    ax.autoscale_view()
+ 
+
 if __name__ == '__main__':
 
-    # file_path = 'soft-robotics-demo.mp4'
-    # # dims 1920x1080
-    # origin = np.array([200, 400])
-    # ROI = np.array([1200, 1080])
-
     file_path = 'IMG_3614.mov'
-    # dims 1920x1080
     origin = np.array([600, 675])
     ROI = np.array([850, 1050])
 
@@ -58,6 +61,7 @@ if __name__ == '__main__':
         print("Error opening video stream or file")
 
     centers_temp = np.array([])
+    n_markers = 7
 
     # Set up the matplotlib figure and axis
     fig, ax = plt.subplots()
@@ -76,23 +80,12 @@ if __name__ == '__main__':
     frame_count = 0
     angles_list = []
 
-    # Function to update the plot for each frame
-    def update_plot(frame_count, angles_list):
-        for i, line in enumerate(plot_lines):
-            line.set_data(range(frame_count), [
-                          angles[i] for angles in angles_list])
-        ax.relim()
-        ax.autoscale_view()
-
     while (vc.isOpened()):
         ret, img_rgb = vc.read()
 
         # Check if the frame is empty and break the loop if it is
         if not ret or img_rgb is None:
             break
-
-        # cropping
-        # img_rgb = img_rgb[origin[0]:ROI[0], origin[1]:ROI[1]]
 
         # blurring
         img_rgb = cv.medianBlur(img_rgb, 5)
@@ -155,7 +148,7 @@ if __name__ == '__main__':
             update_plot(frame_count, angles_list)
             plt.pause(0.001)
 
-            if cv.waitKey(27//25) & 0xFF == ord('q'):
+            if cv.waitKey(1) & 0xFF == ord('q'):
                 break
 
         else:
@@ -163,7 +156,7 @@ if __name__ == '__main__':
 
     cv.destroyAllWindows()
 
-    # erase plot
+    # erase existing plot
     plt.clf()
 
     # After the video processing loop
