@@ -44,7 +44,7 @@ if __name__ == '__main__':
     # origin = np.array([200, 400])
     # ROI = np.array([1200, 1080])
 
-    file_path = 'IMG_3599.mov'
+    file_path = 'IMG_3603.mov'
     # dims 1920x1080
     origin = np.array([600,675])
     ROI = np.array([850, 1050])
@@ -118,7 +118,7 @@ if __name__ == '__main__':
                     (centers[i+1, 0], centers[i+1, 1]), (255, 0, 0), 2)
 
         if ret:
-            cv.imshow('image', img_rgb)
+            cv.imshow('image', cv.rotate(img_rgb, cv.ROTATE_90_COUNTERCLOCKWISE))
 
             if cv.waitKey(27) & 0xFF == ord('q'):
                 break
