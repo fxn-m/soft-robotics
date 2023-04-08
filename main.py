@@ -39,15 +39,20 @@ def angle_between_lines(p1, p2, p3):
 
 if __name__ == '__main__':
 
-    file_path = 'soft-robotics-demo.mp4'
+    # file_path = 'soft-robotics-demo.mp4'
+    # # dims 1920x1080
+    # origin = np.array([200, 400])
+    # ROI = np.array([1200, 1080])
+
+    file_path = 'IMG_3599.mov'
+    # dims 1920x1080
+    origin = np.array([600,675])
+    ROI = np.array([850, 1050])
+
     vc = cv.VideoCapture(file_path)
 
     if (vc.isOpened() == False):
         print("Error opening video stream or file")
-
-    origin = np.array([500, 0])
-    # dims 1920x1080
-    shape = np.array([1200, 1080])
 
     centers_temp = np.array([])
     angles_list = []
@@ -56,12 +61,14 @@ if __name__ == '__main__':
         ret, img_rgb = vc.read()
 
         # cropping
-        img_rgb = img_rgb[origin[1]:shape[1], origin[0]:shape[0]]
+        # img_rgb = img_rgb[origin[0]:ROI[0], origin[1]:ROI[1]]
         
         # blurring
         img_rgb = cv.medianBlur(img_rgb, 5)
+        img_rgb= cv.rotate(img_rgb, cv.ROTATE_90_CLOCKWISE)
 
         img_hsv = cv.cvtColor(img_rgb, cv.COLOR_BGR2HSV)
+
 
         # detecting points by color
         red_hsv_lower = np.array([0, 50, 50])
@@ -75,6 +82,7 @@ if __name__ == '__main__':
                            upperb=red_hsv_higher)
         mask = mask1 + mask2
 
+
         # detecting contours
         contours, hierarchy = cv.findContours(
             mask, cv.RETR_TREE, cv.CHAIN_APPROX_NONE)
@@ -83,17 +91,18 @@ if __name__ == '__main__':
         centers = []
         for cnt in contours:
             (x, y), radius = cv.minEnclosingCircle(cnt)
-            center = (int(x), int(y))
+            if radius > 5:
+                center = (int(x), int(y))
 
-            cv.circle(img_rgb, center, 5, (255, 0, 0), -1)
-            centers.append([center[0], center[1]])
+                cv.circle(img_rgb, center, 5, (255, 0, 0), -1)
+                centers.append([center[0], center[1]])
 
         centers = np.array(centers)
         if len(centers_temp) == 0:
             centers_temp = centers
 
         # sorting
-        centers = sorting(centers_temp, centers)
+        centers = sorting(centers_temp, centers)    
         centers_temp = centers
 
         # calculating angles
