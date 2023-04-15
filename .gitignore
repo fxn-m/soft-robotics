@@ -2,3 +2,5 @@
 *.avi
 *.pdf
 *.mov
+
+!IMG_3700.MOV
