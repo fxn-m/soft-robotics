@@ -1,41 +1,13 @@
 # -*- coding:utf-8 -*-
 # Author: Qiukai Qi & Felix Newport-Mangell
-# Date:
+# Date: 15/04/2023
 
 import numpy as np
 import cv2 as cv
 import math
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
 
-
-def sorting(centers_initial, centers_present, n_markers):
-    '''this function sorts the centers detected.
-    '''
-    centers_intermediate = np.ones((n_markers, 2))
-    # looping
-    for i in range(n_markers):
-        for j in range(n_markers):
-            # calculating distance and judge
-            if np.sqrt(np.sum(np.square(centers_initial[i]-centers_present[j]))) < 40:
-                centers_intermediate[i] = centers_present[j]
-                break
-    centers_intermediate = centers_intermediate.astype(np.int16)
-    return centers_intermediate
-
-
-def angle_between_lines(p1, p2, p3):
-    """
-    Calculate the angle between the line p1-p2 and p2-p3
-    """
-    v1 = np.array([p1[0] - p2[0], p1[1] - p2[1]])
-    v2 = np.array([p3[0] - p2[0], p3[1] - p2[1]])
-
-    cosine_angle = np.dot(v1, v2) / (np.linalg.norm(v1) * np.linalg.norm(v2))
-    angle = np.arccos(cosine_angle)
-
-    return angle * 180 / math.pi
-
+from helpers import * 
 
 def update_plot(frame_count, angles_list):
     """
@@ -48,13 +20,9 @@ def update_plot(frame_count, angles_list):
     ax.relim()
     ax.autoscale_view()
  
-
 if __name__ == '__main__':
 
-    file_path = 'IMG_3614.mov'
-    origin = np.array([600, 675])
-    ROI = np.array([850, 1050])
-
+    file_path = './recordings/IMG_3677.mov'
     vc = cv.VideoCapture(file_path)
 
     if (vc.isOpened() == False):
@@ -132,6 +100,7 @@ if __name__ == '__main__':
         for i in range(len(centers)-2):
             angles.append(angle_between_lines(
                 centers[i], centers[i+1], centers[i+2]))
+            angles = [new_angle if new_angle > 90 else 180 - new_angle for new_angle in angles]
         angles_list.append(angles)
 
         # drawing lines
@@ -140,6 +109,7 @@ if __name__ == '__main__':
                     (centers[i+1, 0], centers[i+1, 1]), (255, 0, 0), 2)
 
         if ret:
+            img_rgb = cv.flip(img_rgb, 0)
             cv.imshow('image', cv.rotate(
                 img_rgb, cv.ROTATE_90_COUNTERCLOCKWISE))
 
