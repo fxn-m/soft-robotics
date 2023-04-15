@@ -22,7 +22,7 @@ def update_plot(frame_count, angles_list):
  
 if __name__ == '__main__':
 
-    file_path = './recordings/IMG_3677.mov'
+    file_path = f'./recordings/IMG_{3677+18}.mov'
     vc = cv.VideoCapture(file_path)
 
     if (vc.isOpened() == False):
@@ -138,5 +138,10 @@ if __name__ == '__main__':
 
     plt.xlabel("Frame")
     plt.ylabel("Angle (degrees)")
+    plt.title("Angles for each adjacent line pair")
+
     plt.legend()
+
+    # Export the plot as a PNG
+    plt.savefig('angles_per_line_pair.png', dpi=600)
     plt.show()
