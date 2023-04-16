@@ -22,7 +22,7 @@ def update_plot(frame_count, angles_list):
  
 if __name__ == '__main__':
 
-    file_path = f'./recordings/IMG_{3700}.mov'
+    file_path = f'./recordings/IMG_{3687}.mov'
     vc = cv.VideoCapture(file_path)
 
     if (vc.isOpened() == False):
@@ -33,14 +33,14 @@ if __name__ == '__main__':
 
     # Set up the matplotlib figure and axis
     fig, ax = plt.subplots()
-    ax.set_title("Angles for each adjacent line pair")
+    ax.set_title("Angle at each pivot")
     ax.set_xlabel("Frame")
     ax.set_ylabel("Angle (degrees)")
 
     # Initialize the plot lines for each line pair
     plot_lines = []
     for i in range(n_markers - 2):
-        line, = ax.plot([], [], label=f"Line pair {i + 1}")
+        line, = ax.plot([], [], label=f"Pivot {i + 1}")
         plot_lines.append(line)
     ax.legend(loc=3)
 
@@ -134,11 +134,11 @@ if __name__ == '__main__':
 
     # Plot the angles for each adjacent line pair
     for i in range(angles_array.shape[1]):
-        plt.plot(angles_array[:, i], label=f"Line pair {i+1}")
+        plt.plot(angles_array[:, i], label=f"Pivot {i+1}")
 
     plt.xlabel("Frame")
     plt.ylabel("Angle (degrees)")
-    plt.title("Angles for each adjacent line pair")
+    plt.title("Angle at each pivot")
 
     plt.legend()
 
