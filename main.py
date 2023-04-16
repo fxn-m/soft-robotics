@@ -22,7 +22,7 @@ def update_plot(frame_count, angles_list):
  
 if __name__ == '__main__':
 
-    file_path = f'./recordings/IMG_{3687}.mov'
+    file_path = f'./recordings/IMG_{3700}.mov'
     vc = cv.VideoCapture(file_path)
 
     if (vc.isOpened() == False):
